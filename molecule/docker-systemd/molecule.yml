@@ -8,30 +8,31 @@ dependency:
 
 driver:
   name: docker
-lint:
-  name: yamllint
 platforms:
-  - name: homelab-systemd-local
-    image: ${MOLECULE_DOCKER_IMAGE:-"homelab-systemd:local"}
-    command: "/sbin/init"
-    tmpfs:
-      - /run
-      - /run/lock
-      - /tmp
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+  - name: homelab-local
+    image: homelab:local
     pre_build_image: true
-    capabilities:
-      - SYS_ADMIN
 provisioner:
   name: ansible
-  lint:
-    name: ansible-lint
   inventory:
     group_vars:
       all:
         ansible_python_interpreter: /usr/bin/python3
 verifier:
   name: testinfra
-  lint:
-    name: flake8
+scenario:
+  # Do nother with this docker test. Normally means it will not work in docker
+  create_sequence:
+    - dependency
+  check_sequence:
+    - dependency
+    - cleanup
+  converge_sequence:
+    - dependency
+  destroy_sequence:
+    - dependency
+    - cleanup
+  test_sequence:
+    - lint
+    - dependency
+    - cleanup
